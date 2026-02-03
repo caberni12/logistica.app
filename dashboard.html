@@ -361,7 +361,7 @@ function openMap(d,c){
 }
 function closeMap(){mapModal.style.display='none';mapFrame.src=''}
 
-* EXPORTES */
+/* EXPORTES */
 function exportPDF(btn){
   setLoading(btn,true);
 
@@ -411,16 +411,6 @@ function exportPDF(btn){
   },300);
 }
 
-function exportExcel(btn){
- setLoading(btn,true);
- setTimeout(()=>{
-  const ws=XLSX.utils.json_to_sheet(FILT);
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,"Pedidos");
-  XLSX.writeFile(wb,"Pedidos.xlsx");
-  setLoading(btn,false);
- },300);
-}
 function exportExcel(btn){
  setLoading(btn,true);
  setTimeout(()=>{
