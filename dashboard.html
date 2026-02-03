@@ -361,20 +361,63 @@ function openMap(d,c){
 }
 function closeMap(){mapModal.style.display='none';mapFrame.src=''}
 
-/* EXPORTES */
+* EXPORTES */
 function exportPDF(btn){
+  setLoading(btn,true);
+
+  setTimeout(()=>{
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation:'landscape' });
+
+    // ===== CALCULOS =====
+    const totalPedidos = FILT.length;
+    const totalBultos = FILT.reduce((sum,r)=> sum + Number(r.etiquetas||0), 0);
+
+    // ===== TABLA =====
+    doc.autoTable({
+      head:[[ 
+        'Fecha','Pedido','Cliente','Dirección',
+        'Comuna','Cajas','Obs','Estado'
+      ]],
+      body: FILT.map(r=>[
+        r.fechaIngreso,
+        r.pedido,
+        r.cliente,
+        r.direccion,
+        r.comuna,
+        r.etiquetas || 0,
+        r.observaciones || '',
+        r.status
+      ]),
+      foot: [[
+        '','','','','',
+        `TOTAL BULTOS: ${totalBultos}`,
+        '',
+        `TOTAL PEDIDOS: ${totalPedidos}`
+      ]],
+      footStyles:{
+        fontStyle:'bold',
+        fontSize:12,
+        halign:'right'
+      },
+      styles:{
+        fontSize:10
+      },
+      margin:{ top:20 }
+    });
+
+    doc.save("Pedidos.pdf");
+    setLoading(btn,false);
+  },300);
+}
+
+function exportExcel(btn){
  setLoading(btn,true);
  setTimeout(()=>{
-  const {jsPDF}=window.jspdf;
-  const doc=new jsPDF({orientation:'landscape'});
-  doc.autoTable({
-   head:[[ 'Fecha','Pedido','Cliente','Dirección','Comuna','Cajas','Obs','Estado' ]],
-   body:FILT.map(r=>[
-    r.fechaIngreso,r.pedido,r.cliente,r.direccion,
-    r.comuna,r.etiquetas||0,r.observaciones||'',r.status
-   ])
-  });
-  doc.save("Pedidos.pdf");
+  const ws=XLSX.utils.json_to_sheet(FILT);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,"Pedidos");
+  XLSX.writeFile(wb,"Pedidos.xlsx");
   setLoading(btn,false);
  },300);
 }
